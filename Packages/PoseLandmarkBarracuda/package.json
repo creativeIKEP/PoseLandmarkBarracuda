@@ -1,0 +1,21 @@
+{
+  "author": {
+    "name": "IKEP",
+    "url": "https://ikep.jp"
+  },
+  "name": "jp.ikep.mediapipe.poselandmark",
+  "displayName": "PoseLandmarkBarracuda",
+  "description": "Mediapipe pose landmark for Unity Barracuda",
+  "version": "1.0.0",
+  "unity": "2020.3",
+  "unityRelease": "6f1",
+  "keywords": [
+    "unity",
+    "Barracuda",
+    "Mediapipe",
+    "PoseLandmark"
+  ],
+  "dependencies": {
+    "com.unity.barracuda": "2.0.0-pre.3"
+  }
+}

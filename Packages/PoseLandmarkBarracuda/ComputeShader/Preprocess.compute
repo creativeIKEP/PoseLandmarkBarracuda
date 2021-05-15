@@ -1,0 +1,27 @@
+﻿#pragma kernel Preprocess
+
+#include "Common.cginc"
+
+sampler2D _inputTexture;
+RWStructuredBuffer<float> _output;
+
+// Resize `_inputTexture` texture to network model input image size.
+[numthreads(8, 8, 1)]
+void Preprocess(uint3 id : SV_DispatchThreadID)
+{
+    // Caluculate vertically flipped UV.
+    float2 uv = float2(0.5 + id.x, IMAGE_SIZE - 0.5 - id.y) / IMAGE_SIZE;
+
+    // Caluculate vertically flipped UV gradients.
+    float2 duv_dx = float2(1.0 / IMAGE_SIZE, 0);
+    float2 duv_dy = float2(0, -1.0 / IMAGE_SIZE);
+
+    // Texture sample
+    float3 rgb = tex2Dgrad(_inputTexture, uv, duv_dx, duv_dy).rgb;
+
+    // Generate output buffer
+    uint offs = (id.y * IMAGE_SIZE + id.x) * 3;
+    _output[offs + 0] = rgb.r;
+    _output[offs + 1] = rgb.g;
+    _output[offs + 2] = rgb.b;
+}
