@@ -2,7 +2,11 @@
 
 #include "Common.cginc"
 
-#define VERTEX_COUNT 25
+#ifdef UPPER_BODY
+    #define VERTEX_COUNT 25
+#else
+    #define VERTEX_COUNT 33
+#endif
 
 // Input
 StructuredBuffer<float> _poseFlag;

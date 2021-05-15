@@ -4,7 +4,6 @@
 
     #include "UnityCG.cginc"
 
-    uint _upperBodyOnly;
     StructuredBuffer<float4> _vertices;
 
     float4 Vertex(uint vid : SV_VertexID, uint iid : SV_InstanceID): SV_POSITION

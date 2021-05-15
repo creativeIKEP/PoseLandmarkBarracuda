@@ -14,4 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   preProcessCS: {fileID: 7200000, guid: 0da65044c5d5d0b4ea6010eaf265daf4, type: 3}
   postProcessCS: {fileID: 7200000, guid: 75dd10934f8441c41b35f2baab5d8391, type: 3}
-  model: {fileID: 5022602860645237092, guid: 7d7cea4f431a85b4d8fd1a42daa62f5e, type: 3}
+  fullBodyModel: {fileID: 5022602860645237092, guid: f82a47a7d5ed2eb4594ed37a9a5e2d5e,
+    type: 3}
+  upperBodyModel: {fileID: 5022602860645237092, guid: 7d7cea4f431a85b4d8fd1a42daa62f5e,
+    type: 3}

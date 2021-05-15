@@ -14,20 +14,18 @@ public class PoseVisuallizer : MonoBehaviour
 
     void Start(){
         material = new Material(shader);
-        landmarker = new PoseLandmarker(poseLandmarkResource);
+        landmarker = new PoseLandmarker(poseLandmarkResource, isUpperBodyOnly);
     }
 
     void LateUpdate(){
         // Predict pose detection by neural network model.
-        landmarker.ProcessImage(webCamInput.inputImageTexture);
+        landmarker.ProcessImage(webCamInput.inputImageTexture, isUpperBodyOnly);
     } 
 
     void OnRenderObject(){
-        material.SetInt("_upperBodyOnly", (isUpperBodyOnly ? 1 : 0));
-        material.SetBuffer("_vertices", landmarker.outputBuffer);
-
         material.SetPass(0);
-        Graphics.DrawProceduralNow(MeshTopology.Lines, 4, 25);
+        material.SetBuffer("_vertices", landmarker.outputBuffer);
+        Graphics.DrawProceduralNow(MeshTopology.Lines, 4, (isUpperBodyOnly ? 25 : 33));
     }
 
     void OnApplicationQuit(){

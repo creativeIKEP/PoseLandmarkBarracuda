@@ -6,7 +6,10 @@ namespace Mediapipe.PoseLandmark
     public class PoseLandmarker : System.IDisposable
     {
         const int IMAGE_SIZE = 256;
-        const int VERTEX_COUNT = 25;
+        const int FULL_BODY_VERTEX_COUNT = 33;
+        const int UPPER_BODY_VERTEX_COUNT = 25;
+        const int FULL_BODY_LD_LEN = 195;
+        const int UPPDER_BODY_LD_LEN = 155;
 
         ComputeShader preProcessCS;
         ComputeShader postProcessCS;
@@ -16,20 +19,44 @@ namespace Mediapipe.PoseLandmark
 
         Model model;
         IWorker woker;
+        bool isUpperBodyOnly;
+        NNModel fullBodyModel;
+        NNModel upperBodyModel;
 
-        public PoseLandmarker(PoseLandmarkResource resource){
+        public PoseLandmarker(PoseLandmarkResource resource, bool isUpperBody){
             preProcessCS = resource.preProcessCS;
             postProcessCS = resource.postProcessCS;
 
             networkInputBuffer = new ComputeBuffer(IMAGE_SIZE * IMAGE_SIZE * 3, sizeof(float));
-            outputBuffer = new ComputeBuffer(VERTEX_COUNT + 1, sizeof(float) * 4);
             segmentationRT = new RenderTexture(128, 128, 0, RenderTextureFormat.RFloat);
 
-            model = ModelLoader.Load(resource.model);
-            woker = model.CreateWorker();
+            fullBodyModel = resource.fullBodyModel;
+            upperBodyModel = resource.upperBodyModel;
+
+            ExchangeModel(isUpperBody);
         }
 
-        public void ProcessImage(Texture inputTexture){
+        void ExchangeModel(bool isUpperBody){
+            outputBuffer?.Dispose();
+            woker?.Dispose();
+
+            var vertexCount = isUpperBody ? UPPER_BODY_VERTEX_COUNT : FULL_BODY_VERTEX_COUNT;
+            outputBuffer = new ComputeBuffer(vertexCount + 1, sizeof(float) * 4);
+            NNModel nnModel = isUpperBody ? upperBodyModel : fullBodyModel;
+            model = ModelLoader.Load(nnModel);
+            woker = model.CreateWorker();
+
+            if(isUpperBody) postProcessCS.EnableKeyword("UPPER_BODY");
+            else postProcessCS.DisableKeyword("UPPER_BODY");
+
+            isUpperBodyOnly = isUpperBody;
+        }
+
+        public void ProcessImage(Texture inputTexture, bool isUpperBody){
+            if(isUpperBodyOnly != isUpperBody){
+                ExchangeModel(isUpperBody);
+            }
+
             // Resize `inputTexture` texture to network model image size.
             preProcessCS.SetTexture(0, "_inputTexture", inputTexture);
             preProcessCS.SetBuffer(0, "_output", networkInputBuffer);
@@ -41,7 +68,7 @@ namespace Mediapipe.PoseLandmark
             inputTensor.Dispose();
 
             var poseFlagBuffer = TensorToBuffer("output_poseflag", 1);
-            var landmarkBuffer = TensorToBuffer("ld_3d", 155);
+            var landmarkBuffer = TensorToBuffer("ld_3d", (isUpperBodyOnly ? UPPDER_BODY_LD_LEN : FULL_BODY_LD_LEN));
             
             postProcessCS.SetBuffer(0, "_poseFlag", poseFlagBuffer);
             postProcessCS.SetBuffer(0, "_Landmark", landmarkBuffer);
