@@ -18,14 +18,16 @@ public class PoseVisuallizer : MonoBehaviour
     }
 
     void LateUpdate(){
-        // Predict pose detection by neural network model.
+        // Predict pose landmark by neural network model.
         landmarker.ProcessImage(webCamInput.inputImageTexture, isUpperBodyOnly);
     } 
 
     void OnRenderObject(){
         material.SetPass(0);
+        // Set predicted pose landmark results.
         material.SetBuffer("_vertices", landmarker.outputBuffer);
-        Graphics.DrawProceduralNow(MeshTopology.Lines, 4, (isUpperBodyOnly ? 25 : 33));
+        // Draw (25 or 33) landmark points.
+        Graphics.DrawProceduralNow(MeshTopology.Lines, 4, landmarker.vertexCount);
     }
 
     void OnApplicationQuit(){

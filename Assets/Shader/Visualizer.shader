@@ -10,7 +10,7 @@
     {
         float4 p = _vertices[iid];
 
-        const float size = 0.015;
+        const float size = 0.02;
 
         float x = p.x + size * lerp(-1, 1, vid == 1) * (vid < 2);
         float y = p.y + size * lerp(-1, 1, vid == 3) * (vid >= 2);
