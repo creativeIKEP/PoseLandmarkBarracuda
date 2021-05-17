@@ -1,10 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI;
 using Mediapipe.PoseLandmark;
 
 public class PoseVisuallizer : MonoBehaviour
 {
     [SerializeField] WebCamInput webCamInput;
     [SerializeField] Shader shader;
+    [SerializeField] RawImage segmentationImage;
     [SerializeField] PoseLandmarkResource poseLandmarkResource;
     [SerializeField] bool isUpperBodyOnly;
 
@@ -23,6 +25,8 @@ public class PoseVisuallizer : MonoBehaviour
     } 
 
     void OnRenderObject(){
+        segmentationImage.texture = landmarker.segmentationRT;
+
         material.SetPass(0);
         // Set predicted pose landmark results.
         material.SetBuffer("_vertices", landmarker.outputBuffer);
