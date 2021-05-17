@@ -8,7 +8,7 @@ PoseLandmarkBarracuda implementation is inspired by [HandLandmarkBarracuda](http
 ### Install
 PoseLandmarkBarracuda can be installed by adding below URL on the Unity Package Manager's window.
 ```
-https://github.com/creativeIKEP/PoseLandmarkBarracuda.git?path=Packages/PoseLandmarkBarracuda
+https://github.com/creativeIKEP/PoseLandmarkBarracuda.git?path=Packages/PoseLandmarkBarracuda#v1.0.0
 ```
 
 ### Demo Image
