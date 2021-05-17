@@ -6,8 +6,13 @@
 
     StructuredBuffer<float4> _vertices;
 
-    float4 Vertex(uint vid : SV_VertexID, uint iid : SV_InstanceID): SV_POSITION
-    {
+    struct v2f{
+        float4 position: SV_POSITION;
+        float4 color: COLOR;
+    };
+
+    v2f Vertex(uint vid : SV_VertexID, uint iid : SV_InstanceID)
+    {   
         float4 p = _vertices[iid];
 
         const float size = 0.02;
@@ -17,12 +22,17 @@
         x = (2 * x - 1) * _ScreenParams.y / _ScreenParams.x;
         y =  2 * y - 1;
 
-        return float4(x, y, 0, 1);
+        float score = p.w;
+
+        v2f o;
+        o.position = float4(x, y, 0, 1);
+        o.color = float4(1, 0, 0, score);
+        return o;
     }
 
-    float4 Fragment(float4 pos: SV_POSITION): SV_Target
+    float4 Fragment(v2f i): SV_Target
     {
-        return float4(1, 0, 0, 1);
+        return i.color;
     }
 
     ENDCG
