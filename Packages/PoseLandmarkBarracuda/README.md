@@ -6,9 +6,13 @@ PoseLandmarkBarracuda is a human pose landmark detecter that runs the [Mediapipe
 PoseLandmarkBarracuda implementation is inspired by [HandLandmarkBarracuda](https://github.com/keijiro/HandLandmarkBarracuda) and I referenced [his](https://github.com/keijiro) source code.(Thanks, [keijiro](https://github.com/keijiro)!).
 
 ### Install
-PoseLandmarkBarracuda can be installed by adding below URL on the Unity Package Manager's window.
+PoseLandmarkBarracuda can be installed by adding below URL on the Unity Package Manager's window
 ```
-https://github.com/creativeIKEP/PoseLandmarkBarracuda.git?path=Packages/PoseLandmarkBarracuda#v1.0.0
+https://github.com/creativeIKEP/PoseLandmarkBarracuda.git?path=Packages/PoseLandmarkBarracuda#v1.0.1
+```
+or, adding below sentence to your manifest file(`Packages/manifest.json`) `dependencies` block.
+```
+"jp.ikep.mediapipe.poselandmark": "https://github.com/creativeIKEP/PoseLandmarkBarracuda.git?path=Packages/PoseLandmarkBarracuda#v1.0.1"    
 ```
 
 ### Demo Image
