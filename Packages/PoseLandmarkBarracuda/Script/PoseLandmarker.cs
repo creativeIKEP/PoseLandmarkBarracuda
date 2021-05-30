@@ -99,6 +99,7 @@ namespace Mediapipe.PoseLandmark
             var landmarkBuffer = TensorToBuffer("ld_3d", (isUpperBodyOnly ? UPPDER_BODY_LD_LEN : FULL_BODY_LD_LEN));
             
             // Get final results of pose landmark.
+            postProcessCS.SetInt("_keypointCount", vertexCount);
             postProcessCS.SetBuffer(0, "_poseFlag", poseFlagBuffer);
             postProcessCS.SetBuffer(0, "_Landmark", landmarkBuffer);
             postProcessCS.SetBuffer(0, "_Output", outputBuffer);
@@ -132,10 +133,6 @@ namespace Mediapipe.PoseLandmark
             NNModel nnModel = isUpperBody ? upperBodyModel : fullBodyModel;
             model = ModelLoader.Load(nnModel);
             woker = model.CreateWorker();
-
-            // Switch post process flag.
-            if(isUpperBody) postProcessCS.EnableKeyword("UPPER_BODY");
-            else postProcessCS.DisableKeyword("UPPER_BODY");
 
             // Switch control flag.
             isUpperBodyOnly = isUpperBody;
