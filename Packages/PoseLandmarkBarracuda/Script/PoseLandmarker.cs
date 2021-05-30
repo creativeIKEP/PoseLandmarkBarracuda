@@ -71,7 +71,7 @@ namespace Mediapipe.PoseLandmark
             upperBodyModel = resource.upperBodyModel;
 
             networkInputBuffer = new ComputeBuffer(IMAGE_SIZE * IMAGE_SIZE * 3, sizeof(float));
-            segmentationRT = new RenderTexture(128, 128, 0, RenderTextureFormat.RFloat);
+            segmentationRT = new RenderTexture(128, 128, 0, RenderTextureFormat.ARGB32);
 
             // Initialize related with mode which full body or upper body.
             ExchangeModel(isUpperBody);
@@ -150,7 +150,7 @@ namespace Mediapipe.PoseLandmark
         // Exchange network output tensor to RenderTexture.
         RenderTexture CopyOutputToTempRT(string name, int w, int h)
         {
-            var rtFormat = RenderTextureFormat.RFloat;
+            var rtFormat = RenderTextureFormat.ARGB32;
             var shape = new TensorShape(1, h, w, 1);
             var rt = RenderTexture.GetTemporary(w, h, 0, rtFormat);
             var tensor = woker.PeekOutput(name).Reshape(shape);
