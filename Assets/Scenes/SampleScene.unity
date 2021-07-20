@@ -159,7 +159,7 @@ MonoBehaviour:
   segmentationImage: {fileID: 1893498394}
   poseLandmarkResource: {fileID: 11400000, guid: 96c6d0ae9e526654782bff5a4e684456,
     type: 2}
-  isUpperBodyOnly: 1
+  poseLandmarkModel: 1
 --- !u!4 &302134029
 Transform:
   m_ObjectHideFlags: 0

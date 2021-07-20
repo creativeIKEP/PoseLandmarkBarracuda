@@ -9,7 +9,7 @@ public class PoseVisuallizer : MonoBehaviour
     [SerializeField] RawImage inputImageUI;
     [SerializeField] RawImage segmentationImage;
     [SerializeField] PoseLandmarkResource poseLandmarkResource;
-    [SerializeField] bool isUpperBodyOnly;
+    [SerializeField] PoseLandmarkModel poseLandmarkModel;
 
     Material material;
     PoseLandmarker landmarker;
@@ -17,14 +17,14 @@ public class PoseVisuallizer : MonoBehaviour
 
     void Start(){
         material = new Material(shader);
-        landmarker = new PoseLandmarker(poseLandmarkResource, isUpperBodyOnly);
+        landmarker = new PoseLandmarker(poseLandmarkResource, poseLandmarkModel);
     }
 
     void LateUpdate(){
         inputImageUI.texture = webCamInput.inputImageTexture;
 
         // Predict pose landmark by neural network model.
-        landmarker.ProcessImage(webCamInput.inputImageTexture, isUpperBodyOnly);
+        landmarker.ProcessImage(webCamInput.inputImageTexture, poseLandmarkModel);
     } 
 
     void OnRenderObject(){

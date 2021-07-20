@@ -7,7 +7,8 @@ namespace Mediapipe.PoseLandmark{
     {
         public ComputeShader preProcessCS;
         public ComputeShader postProcessCS;
-        public NNModel fullBodyModel;
-        public NNModel upperBodyModel;
+        public NNModel liteModel;
+        public NNModel fullModel;
+        public NNModel heavyModel;
     }
 }
