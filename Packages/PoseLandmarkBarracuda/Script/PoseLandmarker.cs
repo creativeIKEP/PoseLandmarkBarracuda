@@ -64,7 +64,6 @@ namespace Mediapipe.PoseLandmark
         ComputeBuffer networkInputBuffer;
         NNModel liteModel;
         NNModel fullModel;
-        NNModel heavyModel;
         Model model;
         IWorker woker;
         PoseLandmarkModel selectedModel;
@@ -76,7 +75,6 @@ namespace Mediapipe.PoseLandmark
             postProcessCS = resource.postProcessCS;
             liteModel = resource.liteModel;
             fullModel = resource.fullModel;
-            heavyModel = resource.heavyModel;
 
             networkInputBuffer = new ComputeBuffer(IMAGE_SIZE * IMAGE_SIZE * 3, sizeof(float));
             segmentationRT = new RenderTexture(SEGMENTATION_SIZE, SEGMENTATION_SIZE, 0, RenderTextureFormat.ARGB32);
@@ -145,9 +143,6 @@ namespace Mediapipe.PoseLandmark
                     break;
                 case PoseLandmarkModel.full:
                     nnModel = fullModel;
-                    break;
-                case PoseLandmarkModel.heavy:
-                    nnModel = heavyModel;
                     break;
                 default:
                     nnModel = fullModel;

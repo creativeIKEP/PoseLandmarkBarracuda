@@ -9,6 +9,5 @@ namespace Mediapipe.PoseLandmark{
         public ComputeShader postProcessCS;
         public NNModel liteModel;
         public NNModel fullModel;
-        public NNModel heavyModel;
     }
 }
