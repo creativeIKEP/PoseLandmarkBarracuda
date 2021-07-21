@@ -9,9 +9,9 @@ namespace Mediapipe.PoseLandmark
         /*
         Pose landmark result Buffer.
             'outputBuffer' is array of float4 type.
-            0~(24 or 32) index datas are pose landmark.
+            0~32 index datas are pose landmark.
             Check below Mediapipe document about relation between index and landmark position.
-            https://google.github.io/mediapipe/solutions/pose#pose_landmarks
+            https://google.github.io/mediapipe/solutions/pose#pose-landmark-model-blazepose-ghum-3d
 
             Each data factors are
             x: x cordinate value of pose landmark ([0, 1]).
@@ -21,67 +21,74 @@ namespace Mediapipe.PoseLandmark
                This value is full body mode only.
             w: The score of whether the landmark position is visible ([0, 1]).
 
-            (25 or 33) index data is the score whether human pose is visible ([0, 1]).
+            33 index data is the score whether human pose is visible ([0, 1]).
             This data is (score, 0, 0, 0).
         */
         public ComputeBuffer outputBuffer;
+        /*
+        Pose world landmark result Buffer.
+            'worldLandmarkBuffer' is array of float4 type.
+            0~32 index datas are pose world landmark.
+
+            Each data factors are
+            x, y and z: Real-world 3D coordinates in meters with the origin at the center between hips.
+            w: The score of whether the world landmark position is visible ([0, 1]).
+
+            33 index data is the score whether human pose is visible ([0, 1]).
+            This data is (score, 0, 0, 0).
+        */
+        public ComputeBuffer worldLandmarkBuffer;
         // Pose segmentation.
         public RenderTexture segmentationRT;
         // Pose landmark point counts.
-        public int vertexCount{
-            get{
-                if(isUpperBodyOnly) return UPPER_BODY_VERTEX_COUNT;
-                return FULL_BODY_VERTEX_COUNT;
-            }
-        }
+        public int vertexCount => BODY_VERTEX_COUNT;
         #endregion
         
         #region constant number
         // Input image size defined by pose landmark network model.
         const int IMAGE_SIZE = 256;
-        // Pose landmark point counts when full body mode.
+        // Pose landmark point counts.
         // Defined by full body neural network model.
-        const int FULL_BODY_VERTEX_COUNT = 33;
-        // Pose landmark point counts when upper body mode.
-        // Defined by upper body neural network model.
-        const int UPPER_BODY_VERTEX_COUNT = 25;
-        // Output vector length of full body neural network model. 
-        const int FULL_BODY_LD_LEN = 195;
-        // Output vector length of upper body neural network model. 
-        const int UPPDER_BODY_LD_LEN = 155;
+        const int BODY_VERTEX_COUNT = 33;
+        // Output vector length of network model. 
+        const int BODY_LD_LEN = 195;
+        // World landmark output vector length of network model. 
+        const int WORLD_LD_LEN = 117;
+        // Pose segmentation texture size.
+        const int SEGMENTATION_SIZE = 128;
         #endregion
 
         #region private variable
-        // Mode flag which full body or upper body.
-        bool isUpperBodyOnly;
         ComputeShader preProcessCS;
         ComputeShader postProcessCS;
         ComputeBuffer networkInputBuffer;
-        NNModel fullBodyModel;
-        NNModel upperBodyModel;
+        NNModel liteModel;
+        NNModel fullModel;
         Model model;
         IWorker woker;
+        PoseLandmarkModel selectedModel;
         #endregion
         
         #region public method
-        public PoseLandmarker(PoseLandmarkResource resource, bool isUpperBody){
+        public PoseLandmarker(PoseLandmarkResource resource, PoseLandmarkModel poseLandmarkModel){
             preProcessCS = resource.preProcessCS;
             postProcessCS = resource.postProcessCS;
-            fullBodyModel = resource.fullBodyModel;
-            upperBodyModel = resource.upperBodyModel;
+            liteModel = resource.liteModel;
+            fullModel = resource.fullModel;
 
             networkInputBuffer = new ComputeBuffer(IMAGE_SIZE * IMAGE_SIZE * 3, sizeof(float));
-            segmentationRT = new RenderTexture(128, 128, 0, RenderTextureFormat.ARGB32);
+            segmentationRT = new RenderTexture(SEGMENTATION_SIZE, SEGMENTATION_SIZE, 0, RenderTextureFormat.ARGB32);
+            outputBuffer = new ComputeBuffer(vertexCount + 1, sizeof(float) * 4);
+            worldLandmarkBuffer = new ComputeBuffer(vertexCount + 1, sizeof(float) * 4);
 
             // Initialize related with mode which full body or upper body.
-            ExchangeModel(isUpperBody);
+            ExchangeModel(selectedModel);
         }
 
-        public void ProcessImage(Texture inputTexture, bool isUpperBody){
-            if(isUpperBodyOnly != isUpperBody){
-                // Reinitialize variables related with mode which full body or upper body
-                // if mode of this frame was changed from previous mode.
-                ExchangeModel(isUpperBody);
+        public void ProcessImage(Texture inputTexture, PoseLandmarkModel poseLandmarkModel){
+            if(selectedModel != poseLandmarkModel){
+                // Reinitialize variables related with modes if mode of this frame was changed from previous mode.
+                ExchangeModel(poseLandmarkModel);
             }
 
             // Resize `inputTexture` texture to network model image size.
@@ -95,47 +102,57 @@ namespace Mediapipe.PoseLandmark
             inputTensor.Dispose();
 
             // Convert 4 dimensions Tensor to 1 dimension ComputeBuffer.
-            var poseFlagBuffer = TensorToBuffer("output_poseflag", 1);
-            var landmarkBuffer = TensorToBuffer("ld_3d", (isUpperBodyOnly ? UPPDER_BODY_LD_LEN : FULL_BODY_LD_LEN));
+            var poseFlagBuffer = TensorToBuffer("Identity_1", 1);
+            var landmarkBuffer = TensorToBuffer("Identity", BODY_LD_LEN);
+            var worldLandmarkRawBuffer = TensorToBuffer("Identity_4", WORLD_LD_LEN);
             
             // Get final results of pose landmark.
             postProcessCS.SetInt("_keypointCount", vertexCount);
             postProcessCS.SetBuffer(0, "_poseFlag", poseFlagBuffer);
             postProcessCS.SetBuffer(0, "_Landmark", landmarkBuffer);
+            postProcessCS.SetBuffer(0, "_LandmarkWorld", worldLandmarkRawBuffer);
             postProcessCS.SetBuffer(0, "_Output", outputBuffer);
+            postProcessCS.SetBuffer(0, "_OutputWorld", worldLandmarkBuffer);
             postProcessCS.Dispatch(0, 1, 1, 1);
 
             // Set pose landmark segmentation texture.
-            var segTemp = CopyOutputToTempRT("output_segmentation", 128, 128);
+            var segTemp = CopyOutputToTempRT("Identity_2", SEGMENTATION_SIZE, SEGMENTATION_SIZE);
             Graphics.Blit(segTemp, segmentationRT);
             RenderTexture.ReleaseTemporary(segTemp);
         }
 
         public void Dispose(){
-            networkInputBuffer.Dispose();
-            outputBuffer.Dispose();
+            networkInputBuffer?.Dispose();
+            outputBuffer?.Dispose();
+            worldLandmarkBuffer?.Dispose();
             segmentationRT.Release();
-            woker.Dispose();
+            woker?.Dispose();
         }
         #endregion
 
         #region private method
-        // Reinitialize variables related with mode which full body or upper body.
-        void ExchangeModel(bool isUpperBody){
-            outputBuffer?.Dispose();
+        // Reinitialize variables related with modes.
+        void ExchangeModel(PoseLandmarkModel poseLandmarkModel){
             woker?.Dispose();
 
-            // Reinitialize 'outputBuffer' with new buffer length.
-            var vertexCount = isUpperBody ? UPPER_BODY_VERTEX_COUNT : FULL_BODY_VERTEX_COUNT;
-            outputBuffer = new ComputeBuffer(vertexCount + 1, sizeof(float) * 4);
-
-            // Switch neural network models between full body and upper body.
-            NNModel nnModel = isUpperBody ? upperBodyModel : fullBodyModel;
+            // Switch neural network models.
+            NNModel nnModel;
+            switch(poseLandmarkModel){
+                case PoseLandmarkModel.lite:
+                    nnModel = liteModel;
+                    break;
+                case PoseLandmarkModel.full:
+                    nnModel = fullModel;
+                    break;
+                default:
+                    nnModel = fullModel;
+                    break;
+            }
             model = ModelLoader.Load(nnModel);
             woker = model.CreateWorker();
 
             // Switch control flag.
-            isUpperBodyOnly = isUpperBody;
+            selectedModel = poseLandmarkModel;
         }
         
         // Extract the vector in the 4 dimensions Tensor as a Compute Buffer.
