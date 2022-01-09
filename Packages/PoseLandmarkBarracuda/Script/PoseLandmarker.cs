@@ -70,7 +70,7 @@ namespace Mediapipe.PoseLandmark
         #endregion
         
         #region public method
-        public PoseLandmarker(PoseLandmarkResource resource, PoseLandmarkModel poseLandmarkModel){
+        public PoseLandmarker(PoseLandmarkResource resource, PoseLandmarkModel poseLandmarkModel = PoseLandmarkModel.full){
             preProcessCS = resource.preProcessCS;
             postProcessCS = resource.postProcessCS;
             liteModel = resource.liteModel;
@@ -82,10 +82,10 @@ namespace Mediapipe.PoseLandmark
             worldLandmarkBuffer = new ComputeBuffer(vertexCount + 1, sizeof(float) * 4);
 
             // Initialize related with mode which full body or upper body.
-            ExchangeModel(selectedModel);
+            ExchangeModel(poseLandmarkModel);
         }
 
-        public void ProcessImage(Texture inputTexture, PoseLandmarkModel poseLandmarkModel){
+        public void ProcessImage(Texture inputTexture, PoseLandmarkModel poseLandmarkModel = PoseLandmarkModel.full){
             // Resize `inputTexture` texture to network model image size.
             preProcessCS.SetTexture(0, "_inputTexture", inputTexture);
             preProcessCS.SetBuffer(0, "_output", networkInputBuffer);
@@ -94,7 +94,7 @@ namespace Mediapipe.PoseLandmark
             ProcessImage(networkInputBuffer, poseLandmarkModel);
         }
 
-        public void ProcessImage(ComputeBuffer input, PoseLandmarkModel poseLandmarkModel){
+        public void ProcessImage(ComputeBuffer input, PoseLandmarkModel poseLandmarkModel = PoseLandmarkModel.full){
             if(selectedModel != poseLandmarkModel){
                 // Reinitialize variables related with modes if mode of this frame was changed from previous mode.
                 ExchangeModel(poseLandmarkModel);
