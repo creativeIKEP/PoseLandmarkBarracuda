@@ -1,6 +1,6 @@
 ### [1.1.1] - 2022-01-09
 - Supported ComputeBuffer input.
-- Set the default value of the `PoseLandmarkModel` type argument to `PoseLandmarkModel.full` during initialization and inference.
+- Set the default value of the `PoseLandmarkModel` type argument to `PoseLandmarkModel.full`.
 
 ### [1.1.0] - 2021-07-21
 - Support 3D world landmarks of MediaPipe Pose v0.8.6
