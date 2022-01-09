@@ -21,7 +21,7 @@ To the `scopedRegistries` section:
 ```
 To the `dependencies` section:
 ```
-"jp.ikep.mediapipe.poselandmark": "1.1.0"
+"jp.ikep.mediapipe.poselandmark": "1.1.1"
 ```
 Finally, the manifest file looks like below:
 ```
@@ -34,7 +34,7 @@ Finally, the manifest file looks like below:
         }
     ],
     "dependencies": {
-        "jp.ikep.mediapipe.poselandmark": "1.1.0",
+        "jp.ikep.mediapipe.poselandmark": "1.1.1",
         ...
     }
 }
@@ -43,11 +43,11 @@ Finally, the manifest file looks like below:
 ### Install from GitHub URL
 PoseLandmarkBarracuda can be installed by adding below URL on the Unity Package Manager's window
 ```
-https://github.com/creativeIKEP/PoseLandmarkBarracuda.git?path=Packages/PoseLandmarkBarracuda#v1.1.0
+https://github.com/creativeIKEP/PoseLandmarkBarracuda.git?path=Packages/PoseLandmarkBarracuda#v1.1.1
 ```
 or, adding below sentence to your manifest file(`Packages/manifest.json`) `dependencies` block.
 ```
-"jp.ikep.mediapipe.poselandmark": "https://github.com/creativeIKEP/PoseLandmarkBarracuda.git?path=Packages/PoseLandmarkBarracuda#v1.1.0"    
+"jp.ikep.mediapipe.poselandmark": "https://github.com/creativeIKEP/PoseLandmarkBarracuda.git?path=Packages/PoseLandmarkBarracuda#v1.1.1"
 ```
 
 ## Demo Image
