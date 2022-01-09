@@ -86,18 +86,22 @@ namespace Mediapipe.PoseLandmark
         }
 
         public void ProcessImage(Texture inputTexture, PoseLandmarkModel poseLandmarkModel){
-            if(selectedModel != poseLandmarkModel){
-                // Reinitialize variables related with modes if mode of this frame was changed from previous mode.
-                ExchangeModel(poseLandmarkModel);
-            }
-
             // Resize `inputTexture` texture to network model image size.
             preProcessCS.SetTexture(0, "_inputTexture", inputTexture);
             preProcessCS.SetBuffer(0, "_output", networkInputBuffer);
             preProcessCS.Dispatch(0, IMAGE_SIZE / 8, IMAGE_SIZE / 8, 1);
 
+            ProcessImage(networkInputBuffer, poseLandmarkModel);
+        }
+
+        public void ProcessImage(ComputeBuffer input, PoseLandmarkModel poseLandmarkModel){
+            if(selectedModel != poseLandmarkModel){
+                // Reinitialize variables related with modes if mode of this frame was changed from previous mode.
+                ExchangeModel(poseLandmarkModel);
+            }
+
             //Execute neural network model.
-            var inputTensor = new Tensor(1, IMAGE_SIZE, IMAGE_SIZE, 3, networkInputBuffer);
+            var inputTensor = new Tensor(1, IMAGE_SIZE, IMAGE_SIZE, 3, input);
             woker.Execute(inputTensor);
             inputTensor.Dispose();
 
